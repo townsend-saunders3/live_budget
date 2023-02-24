@@ -72,7 +72,7 @@ with tab1:
     placeholder3 = st.empty()
     st.title("Volumetric Money Flow")
     st.header('Introduction to flow')
-    st.markdown('The flow of water can is a great analog for the flow of money.  Money flows in and out of our lives constantly')
+    st.markdown('The flow of water is a great analog for the flow of money.  Money flows in and out of our lives constantly')
     st.markdown("How do we measure flow?")
     st.markdown("$Q=V/t$ is the equation for Volume flow rate.  Here $Q$ is equal to the flow rate. $V$ is the volume of water moving and $t$ is the time it takes that volume of water to move")
     st.markdown("For money we can define a similar equation.  $M = I/t$ where $M$ is our money flow rate.  $I$ is your income and t is the time it takes you to earn that money.")
