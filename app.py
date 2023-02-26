@@ -181,32 +181,31 @@ with tab1:
     # st.text('Test if we ever get here')
 with tab2:
     file = st.file_uploader('Upload Chase Credit Card CSV Statement')
-    if not file:
-        st.stop()
-    df = pd.read_csv(file)
-    df = df[df['Type'] == 'Sale']
-    df.Amount = df.Amount * -1
-    df.index = pd.DatetimeIndex(df['Transaction Date'])
-    df['Mill_Rate'] = mill_rate(df.Amount, 30)
-    df = df.sort_index()
-    df['Rolling_Mill_Rate'] = df['Mill_Rate'].rolling(window = '15D', min_periods=0, center= True).sum()
-    df['Real_Time_Rate'] = millRateAdjusted-df.Rolling_Mill_Rate
-    savings = st.number_input('How much do you want to save a month?')
-    millRateSavings = mill_rate(savings, 30)
-    df['Goal_Savings'] = millRateSavings
-    df['Real_Savings'] = df.Real_Time_Rate.mean()
-    st.write(df.columns)
-    st.dataframe(df)
-    st.area_chart(df, x = 'Transaction Date', y = 'Amount')
-    st.bar_chart(df, x = 'Transaction Date', y = 'Mill_Rate')
-    st.line_chart(df, x = 'Transaction Date', y = 'Rolling_Mill_Rate' )
-    st.line_chart(df, x= 'Transaction Date', y = ['Real_Time_Rate', 'Goal_Savings', 'Real_Savings'])
-    start_time = st.select_slider(
-    "Real time Savings Rate?",
-    options = df.index
-    )
-    savingsRate =df.loc[start_time].Real_Time_Rate
-    if not isinstance(savingsRate, np.floating):
-        savingsRate = savingsRate[0]
-    st.metric('Real Time Savings', dollar_rate(savingsRate,30))
+    if file:
+        df = pd.read_csv(file)
+        df = df[df['Type'] == 'Sale']
+        df.Amount = df.Amount * -1
+        df.index = pd.DatetimeIndex(df['Transaction Date'])
+        df['Mill_Rate'] = mill_rate(df.Amount, 30)
+        df = df.sort_index()
+        df['Rolling_Mill_Rate'] = df['Mill_Rate'].rolling(window = '15D', min_periods=0, center= True).sum()
+        df['Real_Time_Rate'] = millRateAdjusted-df.Rolling_Mill_Rate
+        savings = st.number_input('How much do you want to save a month?')
+        millRateSavings = mill_rate(savings, 30)
+        df['Goal_Savings'] = millRateSavings
+        df['Real_Savings'] = df.Real_Time_Rate.mean()
+        st.write(df.columns)
+        st.dataframe(df)
+        st.area_chart(df, x = 'Transaction Date', y = 'Amount')
+        st.bar_chart(df, x = 'Transaction Date', y = 'Mill_Rate')
+        st.line_chart(df, x = 'Transaction Date', y = 'Rolling_Mill_Rate' )
+        st.line_chart(df, x= 'Transaction Date', y = ['Real_Time_Rate', 'Goal_Savings', 'Real_Savings'])
+        start_time = st.select_slider(
+        "Real time Savings Rate?",
+        options = df.index
+        )
+        savingsRate =df.loc[start_time].Real_Time_Rate
+        if not isinstance(savingsRate, np.floating):
+            savingsRate = savingsRate[0]
+        st.metric('Real Time Savings', dollar_rate(savingsRate,30))
 asyncio.run(live_mill_rate_accumulation([millRateIncome,millRateAdjusted, millRateIncome], [placeholder,placeholder2, placeholder3]))
