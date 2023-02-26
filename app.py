@@ -1,8 +1,11 @@
-import streamlit as st
-from datetime import datetime
-import time
-import json
 import asyncio
+import json
+import time
+from datetime import datetime
+import numpy as np
+
+import pandas as pd
+import streamlit as st
 
 session_now = datetime.now()
 if 'session_now' not in st.session_state:
@@ -13,6 +16,9 @@ with open('streaming_costs.json') as file:
 
 def mill_rate(dollar_amount, frequency_days):
     return dollar_amount/frequency_days/24/60/60*1000
+
+def dollar_rate(millRate, frequency_days):
+    return millRate*24*60*60/1000*frequency_days
  
 def mill_volume(now, period):
     if period == 'Minute':
@@ -27,7 +33,8 @@ def mill_volume(now, period):
         return (now - now.replace(month = 1, day = 1, hour = 0, minute = 0, second=0, microsecond=0)).total_seconds()
 
 async def live_mill_rate_accumulation(mill_rates, containers):
-    while True:
+    j=0
+    while j < 20*60*10:
         now = datetime.now()
         for i in range(len(containers)):
             container = containers[i]
@@ -64,7 +71,9 @@ async def live_mill_rate_accumulation(mill_rates, containers):
                     col4.write(round(dayVolume/1000,5))
                     col5.write(round(monthVolume/1000,5))
                     col6.write(round(yearVolume/1000,5))
-        r = await asyncio.sleep(.01)
+        j+=1
+        r = await asyncio.sleep(.06)
+        
 
 tab1, tab2= st.tabs(["Intro", "Itemized Example Spending"])
 
@@ -170,18 +179,34 @@ with tab1:
     #             adjusted_buying_power/1000*secondsSinceStatement, 5))
     #         time.sleep(.05)
     # st.text('Test if we ever get here')
-# with tab2:
-#     containerTransactions = st.container()
-#     addTransaction = containerTransactions.button('Add Transaction')
-#     if addTransaction:
-#         form = containerTransactions.form('Transaction Form')
-#         value = form.number_input('Enter Transaction Amount')
-#         submitted = form.form_submit_button("Submit")
-#         if submitted:
-#             st.write("Value", 5)
-#         st.write("Value", 5)
-#     if st.button('Say hello'):
-#         st.write('Why hello there')
-#     else:
-#         st.write('Goodbye')
+with tab2:
+    file = st.file_uploader('Upload Chase Credit Card CSV Statement')
+    if not file:
+        st.stop()
+    df = pd.read_csv(file)
+    df = df[df['Type'] == 'Sale']
+    df.Amount = df.Amount * -1
+    df.index = pd.DatetimeIndex(df['Transaction Date'])
+    df['Mill_Rate'] = mill_rate(df.Amount, 30)
+    df = df.sort_index()
+    df['Rolling_Mill_Rate'] = df['Mill_Rate'].rolling(window = '15D', min_periods=0, center= True).sum()
+    df['Real_Time_Rate'] = millRateAdjusted-df.Rolling_Mill_Rate
+    savings = st.number_input('How much do you want to save a month?')
+    millRateSavings = mill_rate(savings, 30)
+    df['Goal_Savings'] = millRateSavings
+    df['Real_Savings'] = df.Real_Time_Rate.mean()
+    st.write(df.columns)
+    st.dataframe(df)
+    st.area_chart(df, x = 'Transaction Date', y = 'Amount')
+    st.bar_chart(df, x = 'Transaction Date', y = 'Mill_Rate')
+    st.line_chart(df, x = 'Transaction Date', y = 'Rolling_Mill_Rate' )
+    st.line_chart(df, x= 'Transaction Date', y = ['Real_Time_Rate', 'Goal_Savings', 'Real_Savings'])
+    start_time = st.select_slider(
+    "Real time Savings Rate?",
+    options = df.index
+    )
+    savingsRate =df.loc[start_time].Real_Time_Rate
+    if not isinstance(savingsRate, np.floating):
+        savingsRate = savingsRate[0]
+    st.metric('Real Time Savings', dollar_rate(savingsRate,30))
 asyncio.run(live_mill_rate_accumulation([millRateIncome,millRateAdjusted, millRateIncome], [placeholder,placeholder2, placeholder3]))
