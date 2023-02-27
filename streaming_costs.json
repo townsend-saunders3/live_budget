@@ -1,10 +1,22 @@
 {
-        "Netflix Standard": 15.49,
-        "HBO Max": 15.99,
-        "Disney+": 7.99,
-        "Apple TV+": 4.99,
-        "Hulu": 12.99,
-        "Paramount+": 9.99,
-        "Peacock Premium": 9.99,
-        "Prime Video": 8.99
+    "Netflix Standard": 15.49,
+    "HBO Max": 15.99,
+    "Disney+": 7.99,
+    "Disney Bundle": 16.28,
+    "Apple TV+": 4.99,
+    "Hulu": 12.99,
+    "Paramount+": 9.99,
+    "Peacock Premium": 9.99,
+    "Prime Video": 8.99,
+    "Prime Yearly" : 11.59,
+    "Youtube TV" : 70.58,
+    "Spotify" : 17.37,
+    "Tesla" : 10.85,
+    "Micrsoft Yearly" : 9.05,
+    "Apple Family" : 10.85,
+    "Apple Indiviudal" : 3.25,
+    "NBA League Pass" : 15.69,
+    "NordVPN Yearly" : 8.34,
+    "Cox Cable Bill" : 89.99
+
 }

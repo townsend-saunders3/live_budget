@@ -181,6 +181,7 @@ with tab1:
     # st.text('Test if we ever get here')
 with tab2:
     file = st.file_uploader('Upload Chase Credit Card CSV Statement')
+    st.caption('Your data is not stored after you close your session*')
     if file:
         df = pd.read_csv(file)
         df = df[df['Type'] == 'Sale']
@@ -188,7 +189,7 @@ with tab2:
         df.index = pd.DatetimeIndex(df['Transaction Date'])
         df['Mill_Rate'] = mill_rate(df.Amount, 30)
         df = df.sort_index()
-        df['Rolling_Mill_Rate'] = df['Mill_Rate'].rolling(window = '15D', min_periods=0, center= True).sum()
+        df['Rolling_Mill_Rate'] = df['Mill_Rate'].rolling(window = '15D', min_periods=0).sum()
         df['Real_Time_Rate'] = millRateAdjusted-df.Rolling_Mill_Rate
         savings = st.number_input('How much do you want to save a month?')
         millRateSavings = mill_rate(savings, 30)
